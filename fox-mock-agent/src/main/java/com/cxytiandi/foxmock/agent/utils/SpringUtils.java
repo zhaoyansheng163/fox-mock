@@ -1,8 +1,4 @@
-package org.example.utils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+package com.cxytiandi.foxmock.agent.utils;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Field;
@@ -11,26 +7,29 @@ import java.util.Map;
 import java.util.Set;
 
 public class SpringUtils {
-    private static DefaultListableBeanFactory beanFactory;
-    public static DefaultListableBeanFactory getBeanFactory() {
+    private static Object beanFactory;
+    public static Object getBeanFactory() {
         if (beanFactory != null)
             return beanFactory;
         try {
             System.out.println("...........................Mock-Server:");
-            Class<DefaultListableBeanFactory> defaultListableBeanFactoryClass = DefaultListableBeanFactory.class;
+            Class<?> defaultListableBeanFactoryClass = Class.forName("org.springframework.beans.factory.support.DefaultListableBeanFactory");
             Field serializableFactories = defaultListableBeanFactoryClass.getDeclaredField("serializableFactories");
             serializableFactories.setAccessible(true);
-            Map<String, Reference<DefaultListableBeanFactory>> o = (Map<String, Reference<DefaultListableBeanFactory>>)serializableFactories.get((Object)null);
-            Set<Map.Entry<String, Reference<DefaultListableBeanFactory>>> entries = o.entrySet();
-            Iterator<Map.Entry<String, Reference<DefaultListableBeanFactory>>> iterator = entries.iterator();
+            @SuppressWarnings("unchecked")
+            Map<String, Reference<Object>> factories = (Map<String, Reference<Object>>) serializableFactories.get(null);
+            Set<Map.Entry<String, Reference<Object>>> entries = factories.entrySet();
+            Iterator<Map.Entry<String, Reference<Object>>> iterator = entries.iterator();
             while (iterator.hasNext()) {
-                Map.Entry<String, Reference<DefaultListableBeanFactory>> next = iterator.next();
-                Reference<DefaultListableBeanFactory> value = next.getValue();
-                DefaultListableBeanFactory defaultListableBeanFactory = value.get();
-                assert defaultListableBeanFactory != null;
-                beanFactory = defaultListableBeanFactory;
+                Map.Entry<String, Reference<Object>> next = iterator.next();
+                Reference<Object> value = next.getValue();
+                Object defaultListableBeanFactory = value.get();
+                if (defaultListableBeanFactory != null) {
+                    beanFactory = defaultListableBeanFactory;
+                    break;
+                }
             }
-        } catch (Exception|NoClassDefFoundError e) {
+        } catch (Throwable e) {
             System.out.println("...........................Mock-Server errr");
         }
         return beanFactory;
