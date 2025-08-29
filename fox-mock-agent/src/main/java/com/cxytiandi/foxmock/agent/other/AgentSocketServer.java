@@ -44,6 +44,7 @@ public class AgentSocketServer {
                         String methodName = parts[2];
                         // 通过 Bean 名称获取，避免代理线程类加载器无法加载应用类导致的 CNF 异常
                         String beanName = getBeanName(className);
+                        LOG.warn("beanName:{}  className:{}  methodName:{}",beanName,className,methodName);
                         Object target;
                         try {
                             Method getBeanByName = beanFactory.getClass().getMethod("getBean", String.class);
@@ -60,7 +61,9 @@ public class AgentSocketServer {
                             Method getBeanByType = beanFactory.getClass().getMethod("getBean", Class.class);
                             target = getBeanByType.invoke(beanFactory, targetClass);
                         }
+                        LOG.warn("ssssssssssstarget:{}",target);
                         Method method = target.getClass().getMethod(methodName);
+                        LOG.warn("sssssssssssmethod:{}",method);
                         method.invoke(target);
 
                         // 解析和执行指令
