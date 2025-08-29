@@ -29,6 +29,35 @@ public class SpringUtils {
                     break;
                 }
             }
+            if (beanFactory == null) {
+                // 方案二：通过 LiveBeansView 捕获到的 ApplicationContext 获取 BeanFactory
+                try {
+                    Class<?> liveBeansViewClass = Class.forName("org.springframework.context.support.LiveBeansView");
+                    Field applicationContextsField = liveBeansViewClass.getDeclaredField("applicationContexts");
+                    applicationContextsField.setAccessible(true);
+                    Object ctxSetObj = applicationContextsField.get(null);
+                    if (ctxSetObj instanceof Set) {
+                        Set<?> ctxSet = (Set<?>) ctxSetObj;
+                        for (Object ctx : ctxSet) {
+                            if (ctx == null) continue;
+                            try {
+                                // 优先尝试 getAutowireCapableBeanFactory
+                                try {
+                                    beanFactory = ctx.getClass().getMethod("getAutowireCapableBeanFactory").invoke(ctx);
+                                } catch (NoSuchMethodException ignore) {
+                                    // 其次尝试 getBeanFactory（如 ConfigurableApplicationContext)
+                                    beanFactory = ctx.getClass().getMethod("getBeanFactory").invoke(ctx);
+                                }
+                                if (beanFactory != null) break;
+                            } catch (Throwable ignoreOne) {
+                                // 尝试下一个上下文
+                            }
+                        }
+                    }
+                } catch (Throwable ignore) {
+                    // LiveBeansView 方式不可用，忽略
+                }
+            }
         } catch (Throwable e) {
             System.out.println("...........................Mock-Server errr");
         }

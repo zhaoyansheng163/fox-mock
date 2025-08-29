@@ -25,15 +25,33 @@ public class AgentSocketServer {
                         String command = in.readLine();
                         System.out.println("[Agent] Received command: " + command);
                         Object beanFactory = SpringUtils.getBeanFactory();
+                        if (beanFactory == null) {
+                            out.println("ERROR: Spring BeanFactory not found in target JVM.");
+                            continue;
+                        }
                         //  invoke:com.example.TargetClass:targetMethod
                         String[] parts = command.split(":");
                         String className = parts[1];
                         String methodName = parts[2];
-                        // 优先通过 Class 类型获取 Bean，避免依赖具体 Bean 名
-                        Class<?> targetClass = Class.forName(className);
-                        Method getBeanByType = beanFactory.getClass().getMethod("getBean", Class.class);
-                        Object target = getBeanByType.invoke(beanFactory, targetClass);
-                        Method method = targetClass.getMethod(methodName);
+                        // 通过 Bean 名称获取，避免代理线程类加载器无法加载应用类导致的 CNF 异常
+                        String beanName = SpringUtils.getBeanName(className);
+                        Object target;
+                        try {
+                            Method getBeanByName = beanFactory.getClass().getMethod("getBean", String.class);
+                            target = getBeanByName.invoke(beanFactory, beanName);
+                        } catch (Throwable nameGetEx) {
+                            // 名称获取失败，尝试按类型
+                            ClassLoader appCl = beanFactory.getClass().getClassLoader();
+                            Class<?> targetClass;
+                            try {
+                                targetClass = appCl.loadClass(className);
+                            } catch (ClassNotFoundException e) {
+                                throw new RuntimeException(e);
+                            }
+                            Method getBeanByType = beanFactory.getClass().getMethod("getBean", Class.class);
+                            target = getBeanByType.invoke(beanFactory, targetClass);
+                        }
+                        Method method = target.getClass().getMethod(methodName);
                         method.invoke(target);
 
                         // 解析和执行指令
@@ -41,7 +59,7 @@ public class AgentSocketServer {
 
                         // 将执行结果返回给客户端
                         out.println(response);
-                    } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+                    } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }
