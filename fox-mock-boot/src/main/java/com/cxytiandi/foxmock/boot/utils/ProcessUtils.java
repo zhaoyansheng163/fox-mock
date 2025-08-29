@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.boot.utils;
 
-import com.taobao.arthas.common.*;
-
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -124,11 +122,11 @@ public class ProcessUtils {
             command = new String[] { jps, "-l" };
         }
 
-        List<String> lines = ExecutingCommand.runNative(command);
+        List<String> lines = runNativeCommand(command);
 
         System.out.println("jps result: " + lines);
 
-        long currentPid = Long.parseLong(PidUtils.currentPid());
+        long currentPid = Long.parseLong(getCurrentPid());
         for (String line : lines) {
             String[] strings = line.trim().split("\\s+");
             if (strings.length < 1) {
@@ -171,7 +169,7 @@ public class ProcessUtils {
 
         String javaHome = System.getProperty("java.home");
 
-        if (JavaVersionUtils.isLessThanJava9()) {
+        if (isLessThanJava9()) {
             File toolsJar = new File(javaHome, "lib/tools.jar");
             if (!toolsJar.exists()) {
                 toolsJar = new File(javaHome, "../lib/tools.jar");
@@ -227,7 +225,7 @@ public class ProcessUtils {
 
         File toolsJar = findToolsJar(javaHome);
 
-        if (JavaVersionUtils.isLessThanJava9()) {
+        if (isLessThanJava9()) {
             if (toolsJar == null || !toolsJar.exists()) {
                 throw new IllegalArgumentException("Can not find tools.jar under java home: " + javaHome);
             }
@@ -259,9 +257,9 @@ public class ProcessUtils {
                 public void run() {
                     InputStream inputStream = proc.getInputStream();
                     try {
-                        IOUtils.copy(inputStream, System.out);
+                        copyStream(inputStream, System.out);
                     } catch (IOException e) {
-                        IOUtils.close(inputStream);
+                        closeQuietly(inputStream);
                     }
 
                 }
@@ -272,9 +270,9 @@ public class ProcessUtils {
                 public void run() {
                     InputStream inputStream = proc.getErrorStream();
                     try {
-                        IOUtils.copy(inputStream, System.err);
+                        copyStream(inputStream, System.err);
                     } catch (IOException e) {
-                        IOUtils.close(inputStream);
+                        closeQuietly(inputStream);
                     }
 
                 }
@@ -375,7 +373,7 @@ public class ProcessUtils {
     }
 
     private static File findToolsJar(String javaHome) {
-        if (JavaVersionUtils.isGreaterThanJava8()) {
+        if (isGreaterThanJava8()) {
             return null;
         }
 
@@ -447,5 +445,73 @@ public class ProcessUtils {
 
     private static boolean isJpsProcess(String mainClassName) {
         return "sun.tools.jps.Jps".equals(mainClassName) || "jdk.jcmd/sun.tools.jps.Jps".equals(mainClassName);
+    }
+
+    // 替代 ExecutingCommand.runNative
+    private static List<String> runNativeCommand(String[] command) {
+        List<String> result = new ArrayList<>();
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.add(line);
+                }
+            }
+            process.waitFor();
+        } catch (Exception e) {
+            System.err.println("Failed to execute command: " + Arrays.toString(command) + ", error: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // 替代 PidUtils.currentPid
+    private static String getCurrentPid() {
+        try {
+            // Java 9+ 方式
+            Class<?> processHandleClass = Class.forName("java.lang.ProcessHandle");
+            Object current = processHandleClass.getMethod("current").invoke(null);
+            long pid = (Long) processHandleClass.getMethod("pid").invoke(current);
+            return String.valueOf(pid);
+        } catch (Exception e) {
+            // Java 8 兼容方式
+            try {
+                String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+                return processName.split("@")[0];
+            } catch (Exception ex) {
+                return "0";
+            }
+        }
+    }
+
+    // 替代 JavaVersionUtils.isLessThanJava9
+    private static boolean isLessThanJava9() {
+        String version = System.getProperty("java.version");
+        return version.startsWith("1.");
+    }
+
+    // 替代 JavaVersionUtils.isGreaterThanJava8
+    private static boolean isGreaterThanJava8() {
+        return !isLessThanJava9();
+    }
+
+    // 替代 IOUtils.copy
+    private static void copyStream(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
+        }
+    }
+
+    // 替代 IOUtils.close
+    private static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 }

@@ -17,11 +17,11 @@
             <artifactId>cli</artifactId>
             <version>1.0.4</version>
         </dependency>
-        <dependency>
-            <groupId>com.taobao.arthas</groupId>
-            <artifactId>arthas-common</artifactId>
-            <version>3.6.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.taobao.arthas</groupId>-->
+<!--            <artifactId>arthas-common</artifactId>-->
+<!--            <version>3.6.0</version>-->
+<!--        </dependency>-->
         <!-- for com.sun.tools.attach.VirtualMachine api -->
         <dependency>
             <groupId>com.github.olivergondza</groupId>
