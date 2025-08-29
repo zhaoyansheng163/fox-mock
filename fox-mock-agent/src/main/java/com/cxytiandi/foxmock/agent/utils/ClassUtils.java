@@ -17,15 +17,31 @@ public class ClassUtils {
 
     public static Class<?> forNameByFormat(String className) {
         try {
-            Class<?> result = null;
             String formatClassName = formatClassName(className);
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader != null) {
-                result = classLoader.loadClass(formatClassName);
-            } else {
-                result = Class.forName(formatClassName);
+            // 1) 当前线程 TCCL（Agent 在调用处已切换为目标类加载器）
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl != null) {
+                try {
+                    return cl.loadClass(formatClassName);
+                } catch (ClassNotFoundException ignore) {}
             }
-            return result;
+            // 2) 目标类所在类的类加载器（若调用方传入的是业务对象的方法）
+            try {
+                Class<?> holder = ClassUtils.class;
+                ClassLoader holderCl = holder.getClassLoader();
+                if (holderCl != null) {
+                    return holderCl.loadClass(formatClassName);
+                }
+            } catch (Throwable ignore) {}
+            // 3) 系统类加载器
+            try {
+                ClassLoader sysCl = ClassLoader.getSystemClassLoader();
+                if (sysCl != null) {
+                    return sysCl.loadClass(formatClassName);
+                }
+            } catch (Throwable ignore) {}
+            // 4) 最后使用 Class.forName
+            return Class.forName(formatClassName);
         } catch (ClassNotFoundException e) {
             LOG.error("className {} not found", className, e);
         }

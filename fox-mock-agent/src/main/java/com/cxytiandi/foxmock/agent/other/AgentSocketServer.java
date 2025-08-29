@@ -64,7 +64,17 @@ public class AgentSocketServer {
                         LOG.warn("ssssssssssstarget:{}",target);
                         Method method = target.getClass().getMethod(methodName);
                         LOG.warn("sssssssssssmethod:{}",method);
-                        method.invoke(target);
+                        // 在调用前切换 TCCL，确保被调用方法内部使用到的类加载（例如 JsonUtils -> ClassUtils）能加载到业务类
+                        ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
+                        try {
+                            ClassLoader targetCl = target.getClass().getClassLoader();
+                            if (targetCl != null) {
+                                Thread.currentThread().setContextClassLoader(targetCl);
+                            }
+                            method.invoke(target);
+                        } finally {
+                            Thread.currentThread().setContextClassLoader(oldCl);
+                        }
 
                         // 解析和执行指令
                         String response = executeCommand(command);
