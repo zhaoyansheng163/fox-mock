@@ -1,5 +1,8 @@
 package com.cxytiandi.foxmock.agent.utils;
 
+import org.slf4j.Logger;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
 import java.lang.ref.Reference;
 import java.lang.reflect.Field;
 import java.util.Iterator;
@@ -12,54 +15,32 @@ public class SpringUtils {
         if (beanFactory != null)
             return beanFactory;
         try {
-            System.out.println("...........................Mock-Server:");
-            Class<?> defaultListableBeanFactoryClass = Class.forName("org.springframework.beans.factory.support.DefaultListableBeanFactory");
+            System.out.println("...........................Mock-Server");
+            System.out.println("...........................Mock-Server11");
+            ClassLoader appCl = Thread.currentThread().getContextClassLoader();
+            System.out.println("...........................Mock-appCl");
+            if (appCl == null) appCl = ClassLoader.getSystemClassLoader();
+            System.out.println("...........................Mock-appCl1");
+            Class<?> defaultListableBeanFactoryClass = Class.forName("org.springframework.beans.factory.support.DefaultListableBeanFactory", false, appCl);
+            //Class<DefaultListableBeanFactory> defaultListableBeanFactoryClass = DefaultListableBeanFactory.class;
+            System.out.println("...........................Mock-Server1");
             Field serializableFactories = defaultListableBeanFactoryClass.getDeclaredField("serializableFactories");
+            System.out.println("...........................Mock-Server2");
             serializableFactories.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<String, Reference<Object>> factories = (Map<String, Reference<Object>>) serializableFactories.get(null);
-            Set<Map.Entry<String, Reference<Object>>> entries = factories.entrySet();
-            Iterator<Map.Entry<String, Reference<Object>>> iterator = entries.iterator();
+            Map<String, Reference<DefaultListableBeanFactory>> o = (Map<String, Reference<DefaultListableBeanFactory>>)serializableFactories.get((Object)null);
+            System.out.println("...........................Mock-Server3");
+            Set<Map.Entry<String, Reference<DefaultListableBeanFactory>>> entries = o.entrySet();
+            Iterator<Map.Entry<String, Reference<DefaultListableBeanFactory>>> iterator = entries.iterator();
             while (iterator.hasNext()) {
-                Map.Entry<String, Reference<Object>> next = iterator.next();
-                Reference<Object> value = next.getValue();
-                Object defaultListableBeanFactory = value.get();
-                if (defaultListableBeanFactory != null) {
-                    beanFactory = defaultListableBeanFactory;
-                    break;
-                }
+                System.out.println("...........................Mock-Server4");
+                Map.Entry<String, Reference<DefaultListableBeanFactory>> next = iterator.next();
+                Reference<DefaultListableBeanFactory> value = next.getValue();
+                DefaultListableBeanFactory defaultListableBeanFactory = value.get();
+                assert defaultListableBeanFactory != null;
+                beanFactory = defaultListableBeanFactory;
             }
-            if (beanFactory == null) {
-                // 方案二：通过 LiveBeansView 捕获到的 ApplicationContext 获取 BeanFactory
-                try {
-                    Class<?> liveBeansViewClass = Class.forName("org.springframework.context.support.LiveBeansView");
-                    Field applicationContextsField = liveBeansViewClass.getDeclaredField("applicationContexts");
-                    applicationContextsField.setAccessible(true);
-                    Object ctxSetObj = applicationContextsField.get(null);
-                    if (ctxSetObj instanceof Set) {
-                        Set<?> ctxSet = (Set<?>) ctxSetObj;
-                        for (Object ctx : ctxSet) {
-                            if (ctx == null) continue;
-                            try {
-                                // 优先尝试 getAutowireCapableBeanFactory
-                                try {
-                                    beanFactory = ctx.getClass().getMethod("getAutowireCapableBeanFactory").invoke(ctx);
-                                } catch (NoSuchMethodException ignore) {
-                                    // 其次尝试 getBeanFactory（如 ConfigurableApplicationContext)
-                                    beanFactory = ctx.getClass().getMethod("getBeanFactory").invoke(ctx);
-                                }
-                                if (beanFactory != null) break;
-                            } catch (Throwable ignoreOne) {
-                                // 尝试下一个上下文
-                            }
-                        }
-                    }
-                } catch (Throwable ignore) {
-                    // LiveBeansView 方式不可用，忽略
-                }
-            }
-        } catch (Throwable e) {
-            System.out.println("...........................Mock-Server errr");
+        } catch (Exception|NoClassDefFoundError e) {
+            System.out.println("...........................Mock-Server err");
         }
         return beanFactory;
     }
