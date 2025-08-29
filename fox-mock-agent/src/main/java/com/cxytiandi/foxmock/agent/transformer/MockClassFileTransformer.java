@@ -98,7 +98,7 @@ public class MockClassFileTransformer implements ClassFileTransformer {
                    String methodName = method.getName();
                    if ("invoke".equals(methodName)) {
                        System.out.println("mock dubbo ConsumerContextFilter invoke method");
-                       method.insertBefore("Object data = com.cxytiandi.foxmock.agent.transformer.DubboInvokeFilter.invoke($args);if(java.util.Objects.nonNull(data)){return ($r)data;}");
+                       //method.insertBefore("Object data = com.cxytiandi.foxmock.agent.transformer.DubboInvokeFilter.invoke($args);if(java.util.Objects.nonNull(data)){return ($r)data;}");
                    }
                }
            }
