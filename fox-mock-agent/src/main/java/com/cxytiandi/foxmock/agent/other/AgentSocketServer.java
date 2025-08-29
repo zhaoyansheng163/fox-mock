@@ -1,8 +1,5 @@
 package com.cxytiandi.foxmock.agent.other;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class AgentSocketServer {
-    private static final Logger LOG = LoggerFactory.getLogger(AgentSocketServer.class);
     private static Object beanFactory;
     public static void start(int port) {
         Thread serverThread = new Thread(() -> {
@@ -37,14 +33,14 @@ public class AgentSocketServer {
                             out.println("ERROR: Spring BeanFactory not found in target JVM.");
                             continue;
                         }
-                        LOG.warn("111111:{}",beanFactory);
+                        System.out.println("111111:{}");
                         //  invoke:com.example.TargetClass:targetMethod
                         String[] parts = command.split(":");
                         String className = parts[1];
                         String methodName = parts[2];
                         // 通过 Bean 名称获取，避免代理线程类加载器无法加载应用类导致的 CNF 异常
                         String beanName = getBeanName(className);
-                        LOG.warn("beanName:{}  className:{}  methodName:{}",beanName,className,methodName);
+                        System.out.println("beanName:{}  className:{}  methodName:{}");
                         Object target;
                         try {
                             Method getBeanByName = beanFactory.getClass().getMethod("getBean", String.class);
@@ -61,9 +57,9 @@ public class AgentSocketServer {
                             Method getBeanByType = beanFactory.getClass().getMethod("getBean", Class.class);
                             target = getBeanByType.invoke(beanFactory, targetClass);
                         }
-                        LOG.warn("ssssssssssstarget:{}",target);
+                        System.out.println("ssssssssssstarget:{}");
                         Method method = target.getClass().getMethod(methodName);
-                        LOG.warn("sssssssssssmethod:{}",method);
+                        System.out.println("sssssssssssmethod:{}");
                         // 在调用前切换 TCCL，确保被调用方法内部使用到的类加载（例如 JsonUtils -> ClassUtils）能加载到业务类
                         ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
                         try {
@@ -116,7 +112,7 @@ public class AgentSocketServer {
             System.out.println("...........................Mock-Server");
             System.out.println("...........................Mock-Server11");
             ClassLoader appCl = resolveAppClassLoader();
-            LOG.info("[Agent] resolved App ClassLoader: {}", (appCl == null ? "null" : appCl.getClass().getName()));
+            System.out.println("[Agent] resolved App ClassLoader: {}");
             Class<?> defaultListableBeanFactoryClass = Class.forName("org.springframework.beans.factory.support.DefaultListableBeanFactory", false, appCl);
             System.out.println("...........................Mock-Server1");
             Field serializableFactories = defaultListableBeanFactoryClass.getDeclaredField("serializableFactories");
@@ -165,7 +161,7 @@ public class AgentSocketServer {
                 } catch (Throwable ignore) {}
             }
         } catch (Exception|NoClassDefFoundError e) {
-            LOG.warn("...........................Mock-Server err",e);
+            System.out.println("...........................Mock-Server err");
         }
         return beanFactory;
     }

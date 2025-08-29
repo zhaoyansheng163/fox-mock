@@ -7,7 +7,6 @@ import ognl.*;
 public class OgnlExpress implements Express {
 
     private static final MemberAccess MEMBER_ACCESS = new DefaultMemberAccess(true);
-    private static final Logger logger = LoggerFactory.getLogger(OgnlExpress.class);
     private static final ObjectPropertyAccessor OBJECT_PROPERTY_ACCESSOR = new ObjectPropertyAccessor();
 
     private Object bindObject;
@@ -24,7 +23,7 @@ public class OgnlExpress implements Express {
         try {
             return Ognl.getValue(express, context, bindObject);
         } catch (Exception e) {
-            logger.error("Error during evaluating the expression:", e);
+            System.out.println("Error during evaluating the expression:");
             throw new OgnlExpressException(express, e);
         }
     }

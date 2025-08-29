@@ -1,7 +1,6 @@
 package feign;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
+
 import com.cxytiandi.foxmock.agent.factory.MockInfoFactory;
 import com.cxytiandi.foxmock.agent.model.MockInfo;
 import com.cxytiandi.foxmock.agent.storage.StorageHelper;
@@ -20,8 +19,6 @@ import java.util.Objects;
  * @时间 2022-05-24 23:07
  */
 public class FeignInvokeFilter {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FeignInvokeFilter.class);
 
     public static Object invoke(Object[] argsArray, Object methodHandler) throws Throwable {
         Object[] args = (Object[]) argsArray[0];
@@ -42,7 +39,7 @@ public class FeignInvokeFilter {
             MockInfo mockInfo = MockInfoFactory.create(data);
             boolean filter = MethodInvokeFilter.filter(args, mockInfo.getOgnlExpress());
             if (filter) {
-                LOG.info(String.format("mock methods %s, mock data is %s", key, data));
+                System.out.println(String.format("mock methods %s, mock data is %s", key, data));
                 Type genericReturnType = methodMetadata.returnType();
                 Object value = JsonUtils.parseByType(mockInfo.getMockData(), genericReturnType);
                 return value;

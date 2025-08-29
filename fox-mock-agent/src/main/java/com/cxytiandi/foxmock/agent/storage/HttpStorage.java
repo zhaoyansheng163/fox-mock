@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.agent.storage;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.model.FoxMockAgentArgs;
 import com.cxytiandi.foxmock.agent.utils.HttpUtils;
 import com.cxytiandi.foxmock.agent.utils.MD5;
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
  */
 public class HttpStorage implements Storage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HttpStorage.class);
 
     private static Map<String, String> mockData = new ConcurrentHashMap<>();
 
@@ -68,9 +65,9 @@ public class HttpStorage implements Storage {
                 mockData.put(key, value);
             }
         } catch (IOException e) {
-            LOG.error("loadData IOException, url is {}", request.getMockDataHttpUrl(), e);
+            System.out.println("loadData IOException, url is {}");
         } catch (Exception e) {
-            LOG.error("loadData Exception, url is {}", request.getMockDataHttpUrl(), e);
+            System.out.println("loadData Exception, url is {}");
         }
 
         return true;

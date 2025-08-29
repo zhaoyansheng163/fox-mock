@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.agent.utils;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 
 /**
  * @作者 尹吉欢
@@ -13,7 +11,6 @@ import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
  */
 public class ClassUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClassUtils.class);
 
     public static Class<?> forNameByFormat(String className) {
         try {
@@ -43,7 +40,7 @@ public class ClassUtils {
             // 4) 最后使用 Class.forName
             return Class.forName(formatClassName);
         } catch (ClassNotFoundException e) {
-            LOG.error("className {} not found", className, e);
+            System.out.println("className {} not found");
         }
         return null;
     }

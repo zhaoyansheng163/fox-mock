@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.agent.transformer;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.constant.FoxMockConstant;
 import com.cxytiandi.foxmock.agent.factory.MockInfoFactory;
 import com.cxytiandi.foxmock.agent.model.ClassInfo;
@@ -33,8 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @时间 2022-04-18 22:50
  */
 public class MockClassFileTransformer implements ClassFileTransformer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MockClassFileTransformer.class);
 
     private static Map<String, ClassInfo> CLASS_INFO = new ConcurrentHashMap<>();
 
@@ -77,7 +73,7 @@ public class MockClassFileTransformer implements ClassFileTransformer {
                String data = StorageHelper.get(key);
                if (Objects.nonNull(data)) {
                    match = true;
-                   LOG.info(String.format("mock methods %s, mock data is %s", key, data));
+                   System.out.println(String.format("mock methods %s, mock data is %s", key, data));
                    MockInfo mockInfo = MockInfoFactory.create(data);
                    updateMethod(mockInfo, method, className, methodName);
                }
@@ -87,11 +83,11 @@ public class MockClassFileTransformer implements ClassFileTransformer {
                for (CtMethod method : declaredMethods) {
                    String methodName = method.getName();
                    if (FoxMockConstant.IBATIS_MOCK_QUERY_METHOD.equals(methodName)) {
-                       LOG.info("mock mybatis query method");
+                       System.out.println("mock mybatis query method");
                        method.insertBefore("Object data = com.cxytiandi.foxmock.agent.transformer.MethodInvokeFilter.filterAndConvertDataByMybatisQuery($args);if(java.util.Objects.nonNull(data)){return ($r)data;}");
                    }
                    if (FoxMockConstant.IBATIS_MOCK_UPDATE_METHOD.equals(methodName)) {
-                       LOG.info("mock mybatis update method");
+                       System.out.println("mock mybatis update method");
                        method.insertBefore("Object data = com.cxytiandi.foxmock.agent.transformer.MethodInvokeFilter.filterAndConvertDataByMybatisUpdate($args);if(java.util.Objects.nonNull(data)){return ($r)data;}");
                    }
                }
@@ -101,7 +97,7 @@ public class MockClassFileTransformer implements ClassFileTransformer {
                for (CtMethod method : declaredMethods) {
                    String methodName = method.getName();
                    if ("invoke".equals(methodName)) {
-                       LOG.info("mock dubbo ConsumerContextFilter invoke method");
+                       System.out.println("mock dubbo ConsumerContextFilter invoke method");
                        method.insertBefore("Object data = com.cxytiandi.foxmock.agent.transformer.DubboInvokeFilter.invoke($args);if(java.util.Objects.nonNull(data)){return ($r)data;}");
                    }
                }
@@ -111,7 +107,7 @@ public class MockClassFileTransformer implements ClassFileTransformer {
                for (CtMethod method : declaredMethods) {
                    String methodName = method.getName();
                    if ("invoke".equals(methodName)) {
-                       LOG.info("mock feign FeignInvocationHandler invoke method");
+                       System.out.println("mock feign FeignInvocationHandler invoke method");
                        method.insertBefore("Object data = feign.FeignInvokeFilter.invoke($args,this);if(java.util.Objects.nonNull(data)){return ($r)data;}");
                    }
                }
@@ -126,7 +122,7 @@ public class MockClassFileTransformer implements ClassFileTransformer {
            return ctClass.toBytecode();
 
        } catch (Exception e) {
-           LOG.error("transform {} error", className, e);
+           System.out.println("transform {} error");
            throw new RuntimeException("transform error " + className, e);
        }
     }

@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.agent;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.constant.FoxMockConstant;
 import com.cxytiandi.foxmock.agent.model.FoxMockAgentArgs;
 import com.cxytiandi.foxmock.agent.other.AgentSocketServer;
@@ -30,10 +28,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FoxMockAgent {
 
     static {
-        System.setProperty("arthas.logback.configurationFile", "foxmock-logback.xml");
+        System.setProperty("arthas.logback.configurationFile", "bak/foxmock-logback.xml.txt");
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(FoxMockAgent.class);
+    
 
     private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, new ThreadFactory() {
         @Override
@@ -52,8 +49,7 @@ public class FoxMockAgent {
     public static void premain(final String agentArgs, final Instrumentation inst) {
         try {
             foxMockAgentArgs = agentArgs;
-            LOG.info(String.format("[FoxMockAgent.premain] begin, agentArgs: %s, Instrumentation:%s", agentArgs, inst));
-
+            System.out.println(String.format("[FoxMockAgent.premain] begin, agentArgs: %s, Instrumentation:%s", agentArgs, inst));
             main(agentArgs, inst);
 
             if (isFirstLoad.get()) {
@@ -64,14 +60,14 @@ public class FoxMockAgent {
             }
 
         } catch (Exception e) {
-            LOG.error("FoxMockAgent.premain exception", e);
+            System.out.println("FoxMockAgent.premain exception  errr----");
         }
     }
 
     public static void agentmain(final String agentArgs, final Instrumentation inst) {
        try {
            foxMockAgentArgs = agentArgs;
-           LOG.info(String.format("[FoxMockAgent.agentmain] begin, agentArgs: %s, Instrumentation:%s", agentArgs, inst));
+           System.out.println(String.format("[FoxMockAgent.agentmain] begin, agentArgs: %s, Instrumentation:%s", agentArgs, inst));
 
            main(agentArgs, inst);
            System.out.println("[Agent] Dynamically attached to JVM!");
@@ -85,15 +81,15 @@ public class FoxMockAgent {
                }, 10, 10, TimeUnit.SECONDS);
            }
        } catch (Exception e) {
-           LOG.error("FoxMockAgent.agentmain exception", e);
+           System.out.println("FoxMockAgent.agentmain exception");
        }
     }
 
     private synchronized static void main(final String agentArgs, final Instrumentation inst) {
-        LOG.info("start load data");
+        System.out.println("start load data");
         boolean success = StorageHelper.loadAllData(new FoxMockAgentArgs(agentArgs));
         if (!success) {
-            LOG.info("load data fail");
+            System.out.println("load data fail");
             return;
         }
 
@@ -109,29 +105,29 @@ public class FoxMockAgent {
         for (Class clz : allLoadedClasses) {
             if (mockClassNames.contains(clz.getName())) {
                 try {
-                    LOG.info("retransformClass {}", clz.getName());
+                    System.out.println("retransformClass {}");
                     inst.retransformClasses(clz);
                 } catch (UnmodifiableClassException e) {
-                    LOG.error("retransformClasses exception", e);
+                    System.out.println("retransformClasses exception");
                     throw new RuntimeException("retransformClasses exception", e);
                 }
             }
         }
 
-        LOG.info("foxMock agent run completely");
+        System.out.println("foxMock agent run completely");
     }
 
     private static void preLoadClass() {
         try {
             Class.forName(FoxMockConstant.IBATIS_BASE_EXECUTOR);
         } catch (ClassNotFoundException e) {
-            LOG.warn("{} ClassNotFoundException", FoxMockConstant.IBATIS_BASE_EXECUTOR);
+            System.out.println("{} ClassNotFoundException");
         }
 
         try {
             Class.forName(FoxMockConstant.IBATIS_CACHING_EXECUTOR);
         } catch (ClassNotFoundException e) {
-            LOG.warn("{} ClassNotFoundException", FoxMockConstant.IBATIS_CACHING_EXECUTOR);
+            System.out.println("{} ClassNotFoundException");
         }
     }
 }

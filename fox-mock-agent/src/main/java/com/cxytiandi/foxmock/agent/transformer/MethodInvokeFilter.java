@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.agent.transformer;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.express.Express;
 import com.cxytiandi.foxmock.agent.express.OgnlExpressException;
 import com.cxytiandi.foxmock.agent.express.ExpressFactory;
@@ -34,8 +32,6 @@ import java.util.Objects;
  */
 public class MethodInvokeFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MethodInvokeFilter.class);
-
     public static boolean filter(Object[] args, String express) {
         if (args == null || args.length == 0 || StringUtils.isBlank(express)) {
             return true;
@@ -49,7 +45,7 @@ public class MethodInvokeFilter {
         try {
             return ex.is(express);
         } catch (OgnlExpressException e) {
-            LOG.error("ognl filter exception", e);
+            System.out.println("ognl filter exception");
         }
 
         return false;
@@ -107,7 +103,7 @@ public class MethodInvokeFilter {
         MockInfo mockInfo = MockInfoFactory.create(data);
         boolean filter = filter(argsList.toArray(new Object[argsList.size()]), mockInfo.getOgnlExpress());
         if (filter) {
-            LOG.info(String.format("mock methods %s, mock data is %s", key, data));
+            System.out.println(String.format("mock methods %s, mock data is %s", key, data));
             Type genericReturnType = ReflectionUtils.getGenericReturnType(className, methodName);
             Object obj = JsonUtils.parseByType(mockInfo.getMockData(), genericReturnType);
             return obj;

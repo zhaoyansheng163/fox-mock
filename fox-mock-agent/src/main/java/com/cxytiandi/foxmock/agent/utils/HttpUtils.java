@@ -1,14 +1,10 @@
 package com.cxytiandi.foxmock.agent.utils;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Objects;
 
 public class HttpUtils {
-
-	private static final Logger LOG = LoggerFactory.getLogger(HttpUtils.class);
 
 	public static String get(String url) {
 		HttpURLConnection connection = null;
@@ -23,7 +19,7 @@ public class HttpUtils {
 			connection.connect();
 			return IOUtils.toString(connection.getInputStream(), "UTF-8");
 		} catch (Exception e) {
-			LOG.error("http request exception, url is {}", url, e);
+			System.out.println("http request exception, url is {}");
 		} finally {
 			if (Objects.nonNull(connection)) {
 				connection.disconnect();

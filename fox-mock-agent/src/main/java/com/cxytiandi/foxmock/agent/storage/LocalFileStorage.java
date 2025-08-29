@@ -1,7 +1,5 @@
 package com.cxytiandi.foxmock.agent.storage;
 
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.model.FoxMockAgentArgs;
 import com.cxytiandi.foxmock.agent.utils.CollectionUtils;
 import com.cxytiandi.foxmock.agent.utils.StringUtils;
@@ -30,8 +28,6 @@ import java.util.stream.Stream;
  */
 public class LocalFileStorage implements Storage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LocalFileStorage.class);
-
     private static Map<String, String> mockData = new ConcurrentHashMap<>();
     private static Map<String, Long> mockDataLastModified = new ConcurrentHashMap<>();
     private static List<String> mockMethodWhiteList = new ArrayList<>();
@@ -40,7 +36,7 @@ public class LocalFileStorage implements Storage {
     public boolean loadData(FoxMockAgentArgs request) {
         String fileDirectory = request.getFoxMockFilePath();
         if (StringUtils.isBlank(fileDirectory)) {
-            LOG.info("Can not find foxMockFilePath");
+            System.out.println("Can not find foxMockFilePath");
             return false;
         }
 
@@ -64,7 +60,7 @@ public class LocalFileStorage implements Storage {
             });
 
         } catch (IOException e) {
-            LOG.error("loadData IOException", e);
+            System.out.println("loadData IOException");
         }
 
         return true;
@@ -85,7 +81,7 @@ public class LocalFileStorage implements Storage {
             String content = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
             return content;
         } catch (IOException e) {
-            LOG.error(String.format("readFileContent IOException, path is {}", path.toString()), e);
+            System.out.println(String.format("readFileContent IOException, path is {}"));
         }
         return null;
     }
@@ -99,7 +95,7 @@ public class LocalFileStorage implements Storage {
                 mockDataLastModified.put(key, path.toFile().lastModified());
             });
         } catch (IOException e) {
-            LOG.error("loadData IOException", e);
+            System.out.println("loadData IOException");
         }
     }
 
@@ -121,7 +117,7 @@ public class LocalFileStorage implements Storage {
                         }
                     });
                 } catch (IOException e) {
-                    LOG.error("loadData IOException", e);
+                    System.out.println("loadData IOException");
                 }
 
 
@@ -141,7 +137,7 @@ public class LocalFileStorage implements Storage {
                 initMockDataLastModified(fileDirectory);
             }
         } catch (Exception e) {
-            LOG.error("loadData Exception", e);
+            System.out.println("loadData Exception");
         }
         return true;
     }

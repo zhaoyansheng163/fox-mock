@@ -1,7 +1,4 @@
 package com.cxytiandi.foxmock.agent.transformer;
-
-import com.alibaba.arthas.deps.org.slf4j.Logger;
-import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.factory.MockInfoFactory;
 import com.cxytiandi.foxmock.agent.model.MockInfo;
 import com.cxytiandi.foxmock.agent.storage.StorageHelper;
@@ -22,8 +19,6 @@ import java.util.Objects;
  */
 public class DubboInvokeFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DubboInvokeFilter.class);
-
     public static Result invoke(Object[] args) throws RpcException {
         Invoker<?> invoker = (Invoker<?>) args[0];
         Invocation invocation = (Invocation) args[1];
@@ -35,7 +30,7 @@ public class DubboInvokeFilter {
             MockInfo mockInfo = MockInfoFactory.create(data);
             boolean filter = MethodInvokeFilter.filter(invocation.getArguments(), mockInfo.getOgnlExpress());
             if (filter) {
-                LOG.info(String.format("mock methods %s, mock data is %s", key, data));
+                System.out.println(String.format("mock methods %s, mock data is %s", key, data));
                 Type genericReturnType = ReflectionUtils.getGenericReturnType(className, methodName);
                 Object value = JsonUtils.parseByType(mockInfo.getMockData(), genericReturnType);
                 return AsyncRpcResult.newDefaultAsyncResult(value, invocation);
