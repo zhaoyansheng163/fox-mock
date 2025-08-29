@@ -19,9 +19,9 @@
         <javassist.version>3.28.0-GA</javassist.version>
         <gson.version>2.8.6</gson.version>
         <arthas-repackage-logger.version>0.0.10</arthas-repackage-logger.version>
-        <slf4j-api.version>1.7.36</slf4j-api.version>
-        <logback-classic.version>1.2.11</logback-classic.version>
-        <logback-core.version>1.2.11</logback-core.version>
+<!--        <slf4j-api.version>1.7.36</slf4j-api.version>-->
+<!--        <logback-classic.version>1.2.11</logback-classic.version>-->
+<!--        <logback-core.version>1.2.11</logback-core.version>-->
         <ognl.version>3.1.19</ognl.version>
         <mybatis.version>3.5.6</mybatis.version>
         <dubbo.version>2.7.3</dubbo.version>
