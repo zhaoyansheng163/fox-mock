@@ -4,6 +4,7 @@ import com.alibaba.arthas.deps.org.slf4j.Logger;
 import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 import com.cxytiandi.foxmock.agent.constant.FoxMockConstant;
 import com.cxytiandi.foxmock.agent.model.FoxMockAgentArgs;
+import com.cxytiandi.foxmock.agent.other.AgentSocketServer;
 import com.cxytiandi.foxmock.agent.storage.StorageHelper;
 import com.cxytiandi.foxmock.agent.transformer.MockClassFileTransformer;
 
@@ -73,6 +74,9 @@ public class FoxMockAgent {
            LOG.info(String.format("[FoxMockAgent.agentmain] begin, agentArgs: %s, Instrumentation:%s", agentArgs, inst));
 
            main(agentArgs, inst);
+           System.out.println("[Agent] Dynamically attached to JVM!");
+           // 启动Socket服务器，监听9999端口
+           AgentSocketServer.start(9999);
 
            if (isFirstLoad.get()) {
                isFirstLoad.compareAndSet(true, false);
