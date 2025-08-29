@@ -27,11 +27,7 @@
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!-- 复用arthas重新打好的日志包 -->
-        <dependency>
-            <groupId>com.alibaba.arthas</groupId>
-            <artifactId>arthas-repackage-logger</artifactId>
-        </dependency>
+        <!-- 完全移除日志依赖，避免影响目标应用日志 -->
 <!--        <dependency>-->
 <!--            <groupId>org.slf4j</groupId>-->
 <!--            <artifactId>slf4j-api</artifactId>-->
@@ -141,7 +137,7 @@
 <!--                                    <include>org.slf4j:slf4j-api</include>-->
 <!--                                    <include>ch.qos.logback:logback-classic</include>-->
 <!--                                    <include>ch.qos.logback:logback-core</include>-->
-                                    <include>com.alibaba.arthas:arthas-repackage-logger</include>
+                                    <!-- 移除日志依赖 -->
                                     <include>ognl:ognl</include>
                                 </includes>
                             </artifactSet>

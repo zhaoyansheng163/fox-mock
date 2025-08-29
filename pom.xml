@@ -11,7 +11,7 @@
 
     <modules>
         <module>fox-mock-agent</module>
-        <module>fox-mock-example</module>
+<!--        <module>fox-mock-example</module>-->
         <module>fox-mock-boot</module>
     </modules>
 
@@ -47,6 +47,28 @@
                 <groupId>com.alibaba.arthas</groupId>
                 <artifactId>arthas-repackage-logger</artifactId>
                 <version>${arthas-repackage-logger.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jul-to-slf4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>log4j-to-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 <!--            <dependency>-->
 <!--                <groupId>org.slf4j</groupId>-->
