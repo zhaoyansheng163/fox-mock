@@ -12,11 +12,11 @@
     <artifactId>fox-mock-boot</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.alibaba.middleware</groupId>
-            <artifactId>cli</artifactId>
-            <version>1.0.4</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.middleware</groupId>-->
+<!--            <artifactId>cli</artifactId>-->
+<!--            <version>1.0.4</version>-->
+<!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>com.taobao.arthas</groupId>-->
 <!--            <artifactId>arthas-common</artifactId>-->
