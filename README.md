@@ -62,6 +62,16 @@ attach之前需要将mock的文件路径在agent.properties中指定。
 - [测试环境联调时的数据mock方式](http://cxytiandi.com/blog/detail/36612)
 - [对接配置中心管理mock数据](http://cxytiandi.com/blog/detail/36614)
 - [mock指定的异常](http://cxytiandi.com/blog/detail/36617)
+在foxmock中mock指定的异常也非常简单，异常分为两种，一种是java中自带的，比如java.lang.NullPointerExceptio，另一种就是自定义的异常，如果需要mock自定义的异常，那么该异常必须在你的项目中已经定义好了才行。
+
+mock异常跟mock数据是一样的，都需要创建一个文件或者对接配置中心，异常mock就直接采用我们平时写代码去抛异常的方式，如下：
+
+throw new com.cxytiandi.foxmock.example.MockException("mock exception");
+或者
+
+throw new java.lang.NullPointerException("npe");
+直接在文件中配置好上面的代码即可抛出指定的异常信息。
+
 - [使用ognl表达式mock指定场景](http://cxytiandi.com/blog/detail/36618)
 - [接口（interface）如何mock](http://cxytiandi.com/blog/detail/36621)
 
