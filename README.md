@@ -74,7 +74,16 @@ throw new java.lang.NullPointerException("npe");
 
 - [使用ognl表达式mock指定场景](http://cxytiandi.com/blog/detail/36618)
 - [接口（interface）如何mock](http://cxytiandi.com/blog/detail/36621)
-
+- [目标程序部分日志不打印的问题] 这个一定要理解清除，attach之后，目标程序的方法会被mockdata替代，目标程序被替代的方法中的日志打印也会被覆盖。
+例如：
+    @RequestMapping("/testlist")
+    public List<String> getList() {
+        log.info("enter getList");
+        System.out.println("enter getList");
+        return getListData();
+    }
+这样的目标程序，如果替代了 getList方法，则里面的日志打印也被覆盖了。如果替代的是getListData，则不影响getList()这个方法里的日志打印
+	
 # 视频讲解
 
 - [Java 程序员的福音，mock神器它来啦！再也不用为自测，联调而烦恼啦！](https://www.bilibili.com/video/BV1WS4y1h76q)
