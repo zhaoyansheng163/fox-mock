@@ -4,15 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.ref.Reference;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+
+import com.cxytiandi.foxmock.agent.utils.ScheduledUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import static com.cxytiandi.foxmock.agent.utils.SpringUtils.getBeanFactory;
 import static com.cxytiandi.foxmock.agent.utils.SpringUtils.getBeanName;
@@ -38,8 +36,13 @@ public class AgentSocketServer {
                         //System.out.println("111111:" + beanFactory);
                         //  invoke:com.example.TargetClass:targetMethod
                         String[] parts = command.split(":");
+                        String type = parts[0];
                         String className = parts[1];
                         String methodName = parts[2];
+                        if((type != null) && type.equalsIgnoreCase("quartz") ){
+                            ScheduledUtils.triggerQuartzJob(className);
+                            return;
+                        }
                         // 通过 Bean 名称获取，避免代理线程类加载器无法加载应用类导致的 CNF 异常
                         String beanName = getBeanName(className);
                         System.out.println("beanName:" + beanName + "  className:" + className + "  methodName:" + methodName);
