@@ -2,7 +2,6 @@ package com.cxytiandi.foxmock.agent.utils;
 
 
 import org.quartz.JobKey;
-import org.quartz.SchedulerException;
 import org.quartz.impl.StdScheduler;
 
 import java.lang.reflect.Method;
@@ -14,20 +13,28 @@ public class ScheduledUtils {
         Object target = null;
         try{
             beanFactory = SpringUtils.getBeanFactory();
+            System.out.println("beanFactory:\r\n " + beanFactory);
             try {
                 Method getBeanByName = beanFactory.getClass().getMethod("getBean", String.class);
-                target = getBeanByName.invoke(beanFactory, "schedulerFactory");
+                System.out.println("getBeanByName:\r\n " + getBeanByName);
+                target = getBeanByName.invoke(beanFactory, "quartzScheduler");
+                System.out.println("target1111:\r\n " + target);
             } catch (Throwable nameGetEx) {
                 // 名称获取失败，尝试按类型
+                System.out.println("nameGetEx:\r\n " + nameGetEx);
                 ClassLoader appCl = beanFactory.getClass().getClassLoader();
+                System.out.println("appCl:\r\n ");
                 Class<?> targetClass;
                 try {
-                    targetClass = appCl.loadClass("schedulerFactory");
+                    targetClass = appCl.loadClass("quartzScheduler");
+                    System.out.println("targetClass:\r\n ");
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
                 Method getBeanByType = beanFactory.getClass().getMethod("getBean", Class.class);
+                System.out.println("getBeanByType:\r\n " + getBeanByType);
                 target = getBeanByType.invoke(beanFactory, targetClass);
+                System.out.println("last:\r\n " + target);
             }
 
 
@@ -48,7 +55,7 @@ public class ScheduledUtils {
                 stdScheduler.triggerJob(jobKey);
                 stdScheduler.start();
             }
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

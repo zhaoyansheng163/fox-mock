@@ -1,5 +1,7 @@
 package com.cxytiandi.foxmock.agent.other;
 
+import com.cxytiandi.foxmock.agent.utils.ScheduledUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,9 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import com.cxytiandi.foxmock.agent.utils.ScheduledUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import static com.cxytiandi.foxmock.agent.utils.SpringUtils.getBeanFactory;
 import static com.cxytiandi.foxmock.agent.utils.SpringUtils.getBeanName;
@@ -40,6 +39,7 @@ public class AgentSocketServer {
                         String className = parts[1];
                         String methodName = parts[2];
                         if((type != null) && type.equalsIgnoreCase("quartz") ){
+                            System.out.println("trigger11111:" + className);
                             ScheduledUtils.triggerQuartzJob(className);
                             return;
                         }
