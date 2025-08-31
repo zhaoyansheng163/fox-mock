@@ -22,9 +22,7 @@ public class AgentSocketServer {
             try (ServerSocket serverSocket = new ServerSocket(port)) {
                 System.out.println("[Agent] Socket server started on port " + port);
                 while (!Thread.currentThread().isInterrupted()) {
-                    try (Socket clientSocket = serverSocket.accept();
-                         BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+                    try (Socket clientSocket = serverSocket.accept(); BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
                         // 读取客户端发送的指令
                         String command = in.readLine();
@@ -40,7 +38,7 @@ public class AgentSocketServer {
                         String type = parts[0];
                         String className = parts[1];
                         String methodNameOrGroup = parts[2];
-                        if((type != null) && type.equalsIgnoreCase("quartz") ){
+                        if ((type != null) && type.equalsIgnoreCase("quartz")) {
                             System.out.println("trigger11111:" + className);
 //                            String simpleClassName = parts[parts.length-1];
 ////                            String jobName=simpleClassName+"Detail";
@@ -49,42 +47,42 @@ public class AgentSocketServer {
                             try {
                                 Object stdScheduler = getStdScheduler();
                                 List<String> allJobsFromScheduler = getAllJobsFromScheduler(stdScheduler);
-                                for(String one: allJobsFromScheduler){
-                                    System.out.println("12222:"+one);
+                                for (String one : allJobsFromScheduler) {
+                                    System.out.println("12222:" + one);
                                 }
                                 if (null != stdScheduler) {
-                                // 使用应用程序类加载器来加载 Quartz 相关类
-                                ClassLoader appClassLoader = stdScheduler.getClass().getClassLoader();
+                                    // 使用应用程序类加载器来加载 Quartz 相关类
+                                    ClassLoader appClassLoader = stdScheduler.getClass().getClassLoader();
 
-                                // 加载 JobKey 类
-                                Class<?> jobKeyClass = appClassLoader.loadClass("org.quartz.JobKey");
+                                    // 加载 JobKey 类
+                                    Class<?> jobKeyClass = appClassLoader.loadClass("org.quartz.JobKey");
 
-                                // 创建 JobKey 实例
-                                Constructor<?> jobKeyConstructor = jobKeyClass.getConstructor(String.class,String.class);
-                                Object jobKey = jobKeyConstructor.newInstance(className,methodNameOrGroup);
+                                    // 创建 JobKey 实例
+                                    Constructor<?> jobKeyConstructor = jobKeyClass.getConstructor(String.class, String.class);
+                                    Object jobKey = jobKeyConstructor.newInstance(className, methodNameOrGroup);
 
-                                // 获取 triggerJob 方法
-                                Method triggerJobMethod = stdScheduler.getClass().getMethod("triggerJob", jobKeyClass);
+                                    // 获取 triggerJob 方法
+                                    Method triggerJobMethod = stdScheduler.getClass().getMethod("triggerJob", jobKeyClass);
 
-                                // 调用 triggerJob 方法
-                                triggerJobMethod.invoke(stdScheduler, jobKey);
+                                    // 调用 triggerJob 方法
+                                    triggerJobMethod.invoke(stdScheduler, jobKey);
 
-                                // 获取 start 方法
-                                Method startMethod = stdScheduler.getClass().getMethod("start");
+                                    // 获取 start 方法
+                                    Method startMethod = stdScheduler.getClass().getMethod("start");
 
-                                // 调用 start 方法
-                                startMethod.invoke(stdScheduler);
+                                    // 调用 start 方法
+                                    startMethod.invoke(stdScheduler);
 
-                                System.out.println("Successfully triggered job: " + className);
+                                    System.out.println("Successfully triggered job: " + className);
+                                }
+                            } catch (Exception e) {
+                                // 更详细的错误处理
+                                System.err.println("Error triggering job: " + className);
+                                e.printStackTrace();
+                                // 根据您的需求决定是否抛出异常
+                                // throw new RuntimeException("Failed to trigger job: " + jobName, e);
                             }
-                        } catch (Exception e) {
-                            // 更详细的错误处理
-                            System.err.println("Error triggering job: " + className);
-                            e.printStackTrace();
-                            // 根据您的需求决定是否抛出异常
-                            // throw new RuntimeException("Failed to trigger job: " + jobName, e);
-                        }
-                            return;
+                            continue;
                         }
                         // 通过 Bean 名称获取，避免代理线程类加载器无法加载应用类导致的 CNF 异常
                         String beanName = getBeanName(className);
@@ -125,7 +123,8 @@ public class AgentSocketServer {
 
                         // 将执行结果返回给客户端
                         out.println(response);
-                    } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    } catch (IOException | NoSuchMethodException | IllegalAccessException |
+                             InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }
@@ -138,7 +137,8 @@ public class AgentSocketServer {
             ClassLoader appCl = Thread.currentThread().getContextClassLoader();
             if (appCl == null) appCl = ClassLoader.getSystemClassLoader();
             serverThread.setContextClassLoader(appCl);
-        } catch (Throwable ignore) {}
+        } catch (Throwable ignore) {
+        }
         serverThread.setDaemon(true); // 设置为守护线程，主JVM退出时它也会退出
         serverThread.start();
     }
